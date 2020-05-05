@@ -1,0 +1,33 @@
+{
+  "name": "markdown-it-directive-webcomponents",
+  "version": "1.0.0",
+  "description": "Convert a markdown directive to a web component.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hilookas/markdown-it-directive-webcomponents.git"
+  },
+  "keywords": [
+    "markdown-it",
+    "markdown-it-plugin",
+    "directive",
+    "plugin",
+    "framework",
+    "webcomponents",
+    "vue",
+    "react"
+  ],
+  "author": "lookas",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hilookas/markdown-it-directive-webcomponents/issues"
+  },
+  "homepage": "https://github.com/hilookas/markdown-it-directive-webcomponents#readme",
+  "dependencies": {
+    "markdown-it": "^10.0.0",
+    "markdown-it-directive": "^1.0.0"
+  }
+}
