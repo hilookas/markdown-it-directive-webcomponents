@@ -29,7 +29,7 @@ const md = require('markdown-it')()
   - `name`: The name of the directive
   - `tag`: The tag name of the converted component
   - `allowedAttrs`: Allowed attribute names. If set as an array, elements in the array can be a String or a RegEx. If not set, allow any name. (has security issues, not recommended)
-  - `parseInner`: Whether to continue to parse the content as Markdown or not. Bool type. if it is `false`, the content will be unescaped and written in the output.
+  - `parseInner`: Whether to continue to parse the content as Markdown or not. Bool type. if it is `false`, the content will be unescaped and written in the output (html `< >` etc. will still be escaped).
 
 
 [DOMPurify](https://github.com/cure53/DOMPurify) is recommended as a security backup.
