@@ -16,6 +16,7 @@ const md = require('markdown-it')()
         present: 'both',
         name: 'directive-name',
         tag: 'tag-name',
+        allowedAttrs: [ 'inline', 'src', 'title', /^prefix/ ],
         parseInner: true
       },
     ]
@@ -26,7 +27,10 @@ const md = require('markdown-it')()
   - `present`：解析哪种类型的指令，可以是 `inline`, `block`, `both`
   - `name`：指令的名称
   - `tag`：转换后组件的标签名
+  - `allowedAttrs`：允许使用的属性名，一个数组，数组内元素可以是字符串或者正则表达式，如果不设置则代表无限制（有安全风险，不建议）
   - `parseInner`：是否将内容作为 Markdown 继续解析，Bool 类型，如果为 `false`，会将内容进行反转义后直接写到输出
+
+推荐使用 [DOMPurify](https://github.com/cure53/DOMPurify) 作为安全兜底措施。
 
 以下是三种可以被识别的指令格式：
 
@@ -43,7 +47,7 @@ content
 该插件会分别转换为：
 
 ```html
-<p>text before <tag-name class="class" id="id" name="value" src="/link" title="destination">content</tag-name> text after</p>
+<p>text before <tag-name class="class" id="id" name="value" src="/link" title="destination" inline="">content</tag-name> text after</p>
 
 <tag-name class="class" id="id" name="value" src="/link" title="destination">inline content</tag-name>
 
@@ -66,12 +70,14 @@ const md = require('markdown-it')()
         present: 'both',
         name: 'directive-name',
         tag: 'tag-name',
+        allowedAttrs: [ 'inline', 'src', 'title', /^prefix/ ],
         parseInner: true
       },
       {
         present: 'both',
         name: 'another-directive',
         tag: 'another-tag',
+        allowedAttrs: [ 'inline', 'src', 'title', /^prefix/ ],
         parseInner: false
       },
     ]
@@ -93,7 +99,7 @@ content
 
 /* output
 
-<p>text before <tag-name class="class" id="id" name="value" src="/link" title="destination">content</tag-name> text after</p>
+<p>text before <tag-name class="class" id="id" name="value" src="/link" title="destination" inline="">content</tag-name> text after</p>
 <tag-name class="class" id="id" name="value" src="/link" title="destination">inline content</tag-name>
 <tag-name class="class" id="id" name="value" src="/link" title="destination">
 <p>content</p>

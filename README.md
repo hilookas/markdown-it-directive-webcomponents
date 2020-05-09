@@ -28,7 +28,11 @@ const md = require('markdown-it')()
   - `present`: Which type of directive to parse. Values: `inline`, `block`, `both`.
   - `name`: The name of the directive
   - `tag`: The tag name of the converted component
+  - `allowedAttrs`: Allowed attribute names. If set as an array, elements in the array can be a String or a RegEx. If not set, allow any name. (has security issues, not recommended)
   - `parseInner`: Whether to continue to parse the content as Markdown or not. Bool type. if it is `false`, the content will be unescaped and written in the output.
+
+
+[DOMPurify](https://github.com/cure53/DOMPurify) is recommended as a security backup.
 
 Here are three directive formats that can be recognized:
 
@@ -45,7 +49,7 @@ content
 Will be converted to:
 
 ```html
-<p>text before <tag-name class="class" id="id" name="value" src="/link" title="destination">content</tag-name> text after</p>
+<p>text before <tag-name class="class" id="id" name="value" src="/link" title="destination" inline="">content</tag-name> text after</p>
 
 <tag-name class="class" id="id" name="value" src="/link" title="destination">inline content</tag-name>
 
@@ -68,12 +72,14 @@ const md = require('markdown-it')()
         present: 'both',
         name: 'directive-name',
         tag: 'tag-name',
+        allowedAttrs: [ 'inline', 'src', 'title', /^prefix/ ],
         parseInner: true
       },
       {
         present: 'both',
         name: 'another-directive',
         tag: 'another-tag',
+        allowedAttrs: [ 'inline', 'src', 'title', /^prefix/ ],
         parseInner: false
       },
     ]
@@ -95,7 +101,7 @@ content
 
 /* output
 
-<p>text before <tag-name class="class" id="id" name="value" src="/link" title="destination">content</tag-name> text after</p>
+<p>text before <tag-name class="class" id="id" name="value" src="/link" title="destination" inline="">content</tag-name> text after</p>
 <tag-name class="class" id="id" name="value" src="/link" title="destination">inline content</tag-name>
 <tag-name class="class" id="id" name="value" src="/link" title="destination">
 <p>content</p>

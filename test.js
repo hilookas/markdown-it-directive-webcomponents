@@ -46,6 +46,13 @@ const cases = [
             name: 'ddd',
             tag: 'ddd',
             parseInner: false
+          },
+          {
+            present: 'both',
+            name: 'eee',
+            tag: 'eee',
+            allowedAttrs: [ 'hello', /^a/, /^233/ ],
+            parseInner: false
           }
         ]
       });
@@ -55,7 +62,7 @@ const cases = [
     assert(
       md.render(':aaa[aaa:aaa[]{.2333}\\]\n](/aaa /bbb){src="aaaa"}')
       ===
-      '<p><aaa src="aaaa">aaa<aaa class="2333"></aaa>]\n</aaa></p>\n'
+      '<p><aaa src="aaaa" inline="">aaa<aaa class="2333" inline=""></aaa>]\n</aaa></p>\n'
     );
     
     // should use inlineContent instead of contentTitle
@@ -63,7 +70,7 @@ const cases = [
     assert(
       md.render(`::bbb[aaa:aaa[]{.2333 .666}\\]](/aaa /bbb){src="aaaa"} aaa:::`)
       ===
-      '<bbb src="aaaa">aaa<aaa class="2333 666"></aaa>]</bbb>\n'
+      '<bbb src="aaaa">aaa<aaa class="2333 666" inline=""></aaa>]</bbb>\n'
     );
     
     // should unescape :::
@@ -97,7 +104,14 @@ const cases = [
     assert(
       md.render('::aaa')
       ===
-      '<p>:<aaa></aaa></p>\n'
+      '<p>:<aaa inline=""></aaa></p>\n'
+    );
+    
+    // should filter the attrs
+    assert(
+      md.render(':eee[2333]{aa=123 .class onclick="alert(\'surprise!\')"}')
+      ===
+      '<p><eee aa="123">2333</eee></p>\n'
     );
   } ],
 ];

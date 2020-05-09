@@ -25,7 +25,30 @@ function mergeAttr(attrs, key) {
   return rst;
 }
 
-function getTokenAttrs(attrs, dests) {
+function isAllowedAttrs(compiledAllowedAttrs, name) {
+  if (typeof compiledAllowedAttrs === 'undefined') return true; // default allow all
+  const { regexs, names } = compiledAllowedAttrs;
+  if (names[name]) return true;
+  for (const regex of regexs) {
+    if (regex.test(name)) return true;
+  }
+  return false;
+}
+
+function compileAllowedAttrs(allowedAttrs) {
+  if (typeof allowedAttrs === 'undefined') return undefined;
+  const regexs = [], names = {};
+  for (const x of allowedAttrs) {
+    if (x instanceof RegExp) {
+      regexs.push(x);
+    } else {
+      names[x] = true;
+    }
+  }
+  return { regexs, names };
+}
+
+function getTokenAttrs(attrs, dests, isInline, compiledAllowedAttrs) {
   dests = dests || [];
   attrs = attrs || {};
 
@@ -45,25 +68,33 @@ function getTokenAttrs(attrs, dests) {
     attrs.class = mergeAttr(attrs, 'class');
   }
 
+  if (isInline) {
+    attrs.inline = '';
+  } else {
+    delete attrs.inline;
+  }
+
   const rstAttrs = [];
   for (const key in attrs) {
-    rstAttrs.push([
-      key,
-      Array.isArray(attrs[key]) ? attrs[key][0] : attrs[key]
-    ]);
+    if (isAllowedAttrs(compiledAllowedAttrs, key)) {
+      rstAttrs.push([
+        key,
+        Array.isArray(attrs[key]) ? attrs[key][0] : attrs[key]
+      ]);
+    }
   }
   return rstAttrs;
 }
 
 function inlineHandler(
-  tag, parseInner,
+  tag, parseInner, compiledAllowedAttrs,
   state, content, dests, attrs,
   contentStart, contentEnd, directiveStart, directiveEnd
 ) {
   content = content || '';
 
   let token = state.push('component_open', tag, 1);
-  token.attrs = getTokenAttrs(attrs, dests);
+  token.attrs = getTokenAttrs(attrs, dests, true, compiledAllowedAttrs);
   if (parseInner) {
     const oldMax = state.posMax;
     state.pos = contentStart;
@@ -80,7 +111,7 @@ function inlineHandler(
 }
 
 function blockHandler(
-  tag, parseInner,
+  tag, parseInner, compiledAllowedAttrs,
   state, content, contentTitle, inlineContent, dests, attrs,
   contentStartLine, contentEndLine,
   contentTitleStart, contentTitleEnd,
@@ -99,7 +130,7 @@ function blockHandler(
 
   let token = state.push('component_open', tag, 1);
   token.map = [ directiveStartLine, directiveEndLine ];
-  token.attrs = getTokenAttrs(attrs, dests);
+  token.attrs = getTokenAttrs(attrs, dests, false, compiledAllowedAttrs);
   if (parseInner) {
     if (inlineMode) {
       token = state.push('inline', '', 0);
@@ -134,18 +165,20 @@ function load(md, options) {
 
   for (let component of options.components) {
     component = Object.assign({ present: 'both', parseInner: false }, component);
-    const { present, name, tag, parseInner, attrsHandler, contentHandler } = component;
+    const { present, name, tag, parseInner, allowedAttrs } = component;
 
     if (!DIRECTIVE_NAME_RE.test(name)) throw new Error('Invalid directive name');
     if (!TAG_NAME_RE.test(tag)) throw new Error('Invalid tag name');
 
+    const compiledAllowedAttrs = compileAllowedAttrs(allowedAttrs);
+
     if (present === 'both') {
-      md.inlineDirectives[name] = (...args) => inlineHandler(tag, parseInner, ...args);
-      md.blockDirectives[name] = (...args) => blockHandler(tag, parseInner, ...args);
+      md.inlineDirectives[name] = (...args) => inlineHandler(tag, parseInner, compiledAllowedAttrs, ...args);
+      md.blockDirectives[name] = (...args) => blockHandler(tag, parseInner, compiledAllowedAttrs, ...args);
     } else if (present === 'inline') {
-      md.inlineDirectives[name] = (...args) => inlineHandler(tag, parseInner, ...args);
+      md.inlineDirectives[name] = (...args) => inlineHandler(tag, parseInner, compiledAllowedAttrs, ...args);
     } else if (present === 'block') {
-      md.blockDirectives[name] = (...args) => blockHandler(tag, parseInner, ...args);
+      md.blockDirectives[name] = (...args) => blockHandler(tag, parseInner, compiledAllowedAttrs, ...args);
     } else {
       throw new Error('Invalid present param');
     }
