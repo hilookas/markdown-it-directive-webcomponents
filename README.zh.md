@@ -17,6 +17,8 @@ const md = require('markdown-it')()
         name: 'directive-name',
         tag: 'tag-name',
         allowedAttrs: [ 'inline', 'src', 'title', /^prefix/ ],
+        destLinkName: 'my-link-name',
+        destStringName: 'my-string-name',
         parseInner: true
       },
     ]
@@ -28,6 +30,8 @@ const md = require('markdown-it')()
   - `name`：指令的名称
   - `tag`：转换后组件的标签名
   - `allowedAttrs`：允许使用的属性名，一个数组，数组内元素可以是字符串或者正则表达式，如果不设置则代表无限制（有安全风险，不建议）
+  - `destLinkName`：Link Destination （即 `()` 中的内容）中链接类型的数据转换为属性时的属性名，默认为 `src`
+  - `destStringName`：Link Destination 中字符串类型的数据转换为属性时的属性名，默认为 `title`
   - `parseInner`：是否将内容作为 Markdown 继续解析，Bool 类型，如果为 `false`，会将内容进行反转义后写到输出（html 的 `< >` 等符号仍然会被转义掉）
 
 推荐使用 [DOMPurify](https://github.com/cure53/DOMPurify) 作为安全兜底措施。

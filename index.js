@@ -48,7 +48,7 @@ function compileAllowedAttrs(allowedAttrs) {
   return { regexs, names };
 }
 
-function getTokenAttrs(attrs, dests, isInline, compiledAllowedAttrs) {
+function getTokenAttrs(attrs, dests, isInline, compiledAllowedAttrs, destLinkName, destStringName) {
   dests = dests || [];
   attrs = attrs || {};
 
@@ -56,10 +56,10 @@ function getTokenAttrs(attrs, dests, isInline, compiledAllowedAttrs) {
   for (const dest of dests) {
     if (dest[0] === 'link') {
       // link
-      pushAttr(attrs, 'src', dest[1]);
+      pushAttr(attrs, destLinkName, dest[1]);
     } else {
       // string
-      pushAttr(attrs, 'title', dest[1]);
+      pushAttr(attrs, destStringName, dest[1]);
     }
   }
 
@@ -87,14 +87,14 @@ function getTokenAttrs(attrs, dests, isInline, compiledAllowedAttrs) {
 }
 
 function inlineHandler(
-  tag, parseInner, compiledAllowedAttrs,
+  tag, parseInner, compiledAllowedAttrs, destLinkName, destStringName,
   state, content, dests, attrs,
   contentStart, contentEnd, directiveStart, directiveEnd
 ) {
   content = content || '';
 
   let token = state.push('component_open', tag, 1);
-  token.attrs = getTokenAttrs(attrs, dests, true, compiledAllowedAttrs);
+  token.attrs = getTokenAttrs(attrs, dests, true, compiledAllowedAttrs, destLinkName, destStringName);
   if (parseInner) {
     const oldMax = state.posMax;
     state.pos = contentStart;
@@ -111,7 +111,7 @@ function inlineHandler(
 }
 
 function blockHandler(
-  tag, parseInner, compiledAllowedAttrs,
+  tag, parseInner, compiledAllowedAttrs, destLinkName, destStringName,
   state, content, contentTitle, inlineContent, dests, attrs,
   contentStartLine, contentEndLine,
   contentTitleStart, contentTitleEnd,
@@ -130,7 +130,7 @@ function blockHandler(
 
   let token = state.push('component_open', tag, 1);
   token.map = [ directiveStartLine, directiveEndLine ];
-  token.attrs = getTokenAttrs(attrs, dests, false, compiledAllowedAttrs);
+  token.attrs = getTokenAttrs(attrs, dests, false, compiledAllowedAttrs, destLinkName, destStringName);
   if (parseInner) {
     if (inlineMode) {
       token = state.push('inline', '', 0);
@@ -171,14 +171,16 @@ function load(md, options) {
     if (!TAG_NAME_RE.test(tag)) throw new Error('Invalid tag name');
 
     const compiledAllowedAttrs = compileAllowedAttrs(allowedAttrs);
+    const destLinkName = component.destLinkName || 'src';
+    const destStringName = component.destStringName || 'title';
 
     if (present === 'both') {
-      md.inlineDirectives[name] = (...args) => inlineHandler(tag, parseInner, compiledAllowedAttrs, ...args);
-      md.blockDirectives[name] = (...args) => blockHandler(tag, parseInner, compiledAllowedAttrs, ...args);
+      md.inlineDirectives[name] = (...args) => inlineHandler(tag, parseInner, compiledAllowedAttrs, destLinkName, destStringName, ...args);
+      md.blockDirectives[name] = (...args) => blockHandler(tag, parseInner, compiledAllowedAttrs, destLinkName, destStringName, ...args);
     } else if (present === 'inline') {
-      md.inlineDirectives[name] = (...args) => inlineHandler(tag, parseInner, compiledAllowedAttrs, ...args);
+      md.inlineDirectives[name] = (...args) => inlineHandler(tag, parseInner, compiledAllowedAttrs, destLinkName, destStringName, ...args);
     } else if (present === 'block') {
-      md.blockDirectives[name] = (...args) => blockHandler(tag, parseInner, compiledAllowedAttrs, ...args);
+      md.blockDirectives[name] = (...args) => blockHandler(tag, parseInner, compiledAllowedAttrs, destLinkName, destStringName, ...args);
     } else {
       throw new Error('Invalid present param');
     }

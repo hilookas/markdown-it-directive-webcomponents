@@ -53,6 +53,15 @@ const cases = [
             tag: 'eee',
             allowedAttrs: [ 'hello', /^a/, /^233/ ],
             parseInner: false
+          },
+          {
+            present: 'both',
+            name: 'fff',
+            tag: 'fff',
+            allowedAttrs: [ 'my-id', 'my-id2', /^a/, /^233/ ],
+            destLinkName: 'my-id',
+            destStringName: 'my-id2',
+            parseInner: false
           }
         ]
       });
@@ -112,6 +121,13 @@ const cases = [
       md.render(':eee[2333]{aa=123 .class onclick="alert(\'surprise!\')"}')
       ===
       '<p><eee aa="123">2333</eee></p>\n'
+    );
+    
+    // should rename the dest link and string name 
+    assert(
+      md.render(':fff[](233 "666"){aa=123 .class onclick="alert(\'surprise!\')"}')
+      ===
+      '<p><fff aa="123" my-id="233" my-id2="666"></fff></p>\n'
     );
   } ],
 ];

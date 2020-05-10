@@ -18,6 +18,9 @@ const md = require('markdown-it')()
         present: 'both',
         name: 'directive-name',
         tag: 'tag-name',
+        allowedAttrs: [ 'inline', 'src', 'title', /^prefix/ ],
+        destLinkName: 'my-link-name',
+        destStringName: 'my-string-name',
         parseInner: true
       },
     ]
@@ -29,6 +32,8 @@ const md = require('markdown-it')()
   - `name`: The name of the directive
   - `tag`: The tag name of the converted component
   - `allowedAttrs`: Allowed attribute names. If set as an array, elements in the array can be a String or a RegEx. If not set, allow any name. (has security issues, not recommended)
+  - `destLinkName`: Attribute name when converting link-type data in link destinations (ie. the content in `()`) to attributes. `src` by default
+  - `destStringName`: Attribute name when converting string-type data in link destinations to attributes. `title` by default
   - `parseInner`: Whether to continue to parse the content as Markdown or not. Bool type. if it is `false`, the content will be unescaped and written in the output (html `< >` etc. will still be escaped).
 
 
