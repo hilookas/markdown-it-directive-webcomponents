@@ -1,6 +1,6 @@
 {
   "name": "markdown-it-directive-webcomponents",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Convert a markdown directive to a web component.",
   "main": "index.js",
   "scripts": {
